@@ -1,0 +1,809 @@
+require 'yaml'
+require 'stringex'
+require 'time'
+require 'middleman'
+require_relative './generators/direction'
+require_relative './generators/releases'
+require_relative './lib/devops_tool.rb'
+require_relative './lib/team.rb'
+require_relative './lib/redirect.rb'
+
+desc 'Run all lint tasks'
+task lint: ['lint:scss',
+            'lint:devops_tools:categories',
+            'lint:events:event_type',
+            'lint:events:date',
+            'lint:events:date_ends',
+            'lint:events:description',
+            'lint:events:location',
+            'lint:events:social_tags',
+            'lint:events:event_url',
+            'lint:events:topic',
+            'lint:blog:categories',
+            'lint:mvps',
+            'lint:roles_yml',
+            'lint:redirects_yml',
+            'lint:team_yml:pictures',
+            'lint:team_yml:roles',
+            'lint:team_yml:start_dates',
+            'lint:team_yml:types',
+            'lint:team_yml:unique',
+            'lint:team_yml:unmanaged',
+            'lint:docs_ee',
+            'lint:features:links'] do
+end
+
+namespace :lint do
+  desc 'Lint SCSS files'
+  task :scss do
+    cmd = "npx sass-lint -c .sass-lint.yml '**/*.scss' -v"
+    raise "command failed: #{cmd.join(' ')}" unless system(cmd)
+  end
+
+  namespace :devops_tools do
+    desc "Ensure every devops tool has at least one valid category"
+    task :categories do
+      failed = 0
+      categories = YAML.load_file('data/categories.yml')
+
+      puts ''
+      puts '=> Checking if every devops tool has a valid category'
+
+      Gitlab::Homepage::DevopsTool.all!.each do |devops_tool|
+        next if devops_tool.gitlab?
+
+        # allow nil category
+        next unless devops_tool.category
+
+        # fail on nil category
+        # unless devops_tool.category
+        #   puts devops_tool.key
+        #   failed += 1
+        #   next
+        # end
+        devops_tool.category.each do |category_key|
+          if categories.key?(category_key) == false
+            failed += 1
+            puts "#{devops_tool.key} has invalid category #{category_key}"
+          end
+        end
+      end
+
+      unless failed.zero?
+        puts '----------------------------'
+        if failed == 1
+          puts "Oops! #{failed} devops tool has an invalid category"
+        else
+          puts "Oops! #{failed} devops tools have an invalid category"
+        end
+        exit 1
+      end
+
+      puts 'Every devops tool has a valid category! Congrats!'
+    end
+  end
+
+  namespace :features do
+    desc "Ensure every feature's documentation link is working"
+    task :links do
+      puts "=> Checking if every feature's documentation link is working"
+
+      unless File.directory?('./public/features')
+        warn "WARNING: public/features does not exist. Skipping this lint task."
+        exit 0
+      end
+
+      require 'html-proofer'
+      HTMLProofer.check_directory("./public/features",
+      {
+        url_ignore: [%r{(^\/.*|google|youtu\.be|linkedin|optimizely)}],
+        assume_extension: true,
+        typhoeus: {
+          ssl_verifypeer: false
+        }
+      }).run
+    end
+  end
+
+  namespace :events do
+    file = YAML.load_file('data/events.yml')
+
+    # handles showing failed message
+    def failed_message(failed, key)
+      if failed.zero?
+        puts "Every #{key} in events are correct!"
+      else
+        puts "----------------------------"
+        message = failed == 1 ? 'event has an' : 'events have an'
+        puts "#{failed} #{message} invalid #{key}"
+      end
+    end
+
+    # method for checking for empty values of specific key in file and shows error message
+    def check_empty_value(file, key)
+      puts
+      puts "=> Checking every event in data/events.yml for non-empty #{key}..."
+      failed = 0
+      file.each do |event|
+        next unless event[key].nil?
+
+        if event['topic'].nil?
+          puts "Empty #{key} for event date on #{event['date']}"
+        else
+          puts "Empty #{key} for event '#{event['topic']}' on #{event['date']}"
+        end
+        failed += 1
+      end
+      failed_message(failed, key)
+    end
+
+    def valid_iso_date?(key, date_value)
+      test_date = Time.strptime(date_value.to_s, '%Y-%m-%d')
+      # check if parsed date is same as input date
+      test_date.strftime('%Y-%m-%d') == date_value.to_s
+    rescue ArgumentError => e
+      return "Bad ISO 8601 #{key} format '#{date_value}'" if e
+    end
+
+    def validate_date_format(file, key)
+      # check for YYYY-MM-DD ISO 8601 format with valid month/date format
+      # can be re-used for future date format validation
+      puts
+      puts "=> Checking every event in data/events.yml for valid #{key} is in single ISO 8601 format..."
+      failed = 0
+      file.each do |event|
+        result = valid_iso_date?(key, event[key])
+        if result != true
+          puts "#{result} in event '#{event['topic']}'"
+          failed += 1
+        end
+      end
+      failed_message(failed, key)
+    end
+
+    # not defining all tasks in array to allow individual task run
+    desc "Ensure every event in events.yml has only one valid event type"
+    task :event_type do
+      puts
+      puts '=> Checking every event data/events.yml for valid event_type...'
+      # Diversity, Conference, MeetUp, Speaking Engagement, Webinar, Community Event.
+      EVENT_TYPES = ['Diversity', 'Conference', 'MeetUp', 'Speaking Engagement', 'Webinar', 'Community Event'].freeze
+      failed = 0
+      file.each do |event|
+        if event['type'].nil?
+          puts "Empty event type in event '#{event['topic']}' on #{event['date']}"
+          failed += 1
+        elsif !EVENT_TYPES.include?(event['type'])
+          puts "'#{event['type']}' an invalid event type in event '#{event['topic']}' on #{event['date']}"
+          failed += 1
+        end
+      end
+      return nil if failed.zero?
+
+      failed_message(failed, 'event_type')
+    end
+
+    desc "Ensure date of every event in events.yml is in single ISO 8601 format"
+    task :date do
+      validate_date_format(file, 'date')
+    end
+
+    desc "Ensure date_ends of every event in events.yml is single ISO 8601 format"
+    task :date_ends do
+      validate_date_format(file, 'date_ends')
+    end
+
+    desc "Ensure description of every event in events.yml is not empty"
+    task :description do
+      check_empty_value(file, 'description')
+    end
+
+    desc "Ensure location of every event in events.yml is not empty"
+    task :location do
+      check_empty_value(file, 'location')
+    end
+
+    desc "Ensure social_tags of every event in events.yml is not empty"
+    task :social_tags do
+      check_empty_value(file, 'social_tags')
+    end
+
+    desc "Ensure event_url of every event in events.yml is not empty"
+    task :event_url do
+      check_empty_value(file, 'event_url')
+    end
+
+    desc "Ensure topic of every event in events.yml is not empty"
+    task :topic do
+      check_empty_value(file, 'topic')
+    end
+
+    desc "Ensure every event in events.yml has a valid region"
+    task :region do
+      failed = 0
+      valid_regions = %w[
+        NORAM LATAM EMEA APAC Online
+      ]
+
+      puts ''
+      puts '=> Check if any events have invalid region...'
+
+      file.each do |event|
+        if event['region'].nil?
+          puts "'#{event['topic']}' on #{event['date']}"
+          failed += 1
+        elsif !valid_regions.include?(event['region'])
+          puts "'#{event['topic']}' on #{event['date']}"
+          failed += 1
+        end
+      end
+
+      unless failed.zero?
+        puts '----------------------------'
+        if failed == 1
+          puts "Oops! #{failed} event has an invalid region"
+        else
+          puts "Oops! #{failed} events have invalid regions"
+        end
+        puts "Valid regions are: #{valid_regions.map { |r| "'#{r}'" }.join(', ')}"
+        exit 1
+      end
+
+      puts 'Every event has a valid region! Congrats!'
+    end
+  end
+
+  namespace :blog do
+    desc "Ensure every post has one of the right categories"
+    task :categories do
+      ## Taken from Jekyll
+      ## https://github.com/jekyll/jekyll/blob/3.5-stable/lib/jekyll/document.rb#L13
+      YAML_FRONT_MATTER_REGEXP = /\A(---\s*\n.*?\n?)^((---|\.\.\.)\s*$\n?)/m
+
+      ## Categories as defined in
+      ## https://about.gitlab.com/handbook/marketing/blog/#categories
+      CATEGORIES = ['releases',
+                    'engineering',
+                    'open source',
+                    'culture',
+                    'insights',
+                    'company',
+                    'security'].freeze
+
+      count = 0
+
+      puts ''
+      puts '=> Checking if any posts have incorrect categories...'
+
+      Dir['source/posts/*'].each do |post|
+        content = File.read(post)
+        data = content.scan(YAML_FRONT_MATTER_REGEXP)&.last&.first
+
+        unless data
+          puts "=> Empty header in #{post}"
+          count += 1
+          next
+        end
+
+        ## Disable Rubocop due to https://github.com/ruby/psych/issues/262
+        ## We only parse the file, so there's no security issue anyway
+        # rubocop:disable Security/YAMLLoad
+
+        begin
+          to_yaml = YAML.load(data)
+        rescue Psych::SyntaxError => e
+          puts "=> Error in YAML syntax in #{post}: #{e}"
+          raise
+        end
+        # rubocop:enable Security/YAMLLoad
+
+        unless CATEGORIES.include? to_yaml['categories']
+          puts "=> Missing proper category in #{post}"
+          count += 1
+        end
+      end
+
+      if count.positive?
+        puts
+        puts "#{count} missing or wrong defined categories found. To get this sorted, read:"
+        puts 'https://about.gitlab.com/handbook/marketing/blog/#categories'
+
+        exit count
+      else
+        puts 'All posts have correct categories!'
+      end
+    end
+  end
+
+  desc "Ensure valid format in /data/mvps.yml"
+  task :mvps do
+    puts ''
+    puts '=> Checking if version/name/date in data/mvps.yml are strings...'
+
+    mvps = YAML.load_file('data/mvps.yml')
+
+    mvps.each do |mvp|
+      version = mvp.fetch('version')
+
+      unless version.is_a? String
+        puts "Version must be String: #{version} (#{version.class})"
+        exit 1
+      end
+
+      unless mvp.fetch('name').is_a? String
+        puts "MVP's name for #{version} must be String"
+        exit 1
+      end
+      # Some previous releases have more than one MVP
+      unless mvp.fetch('gitlab', '').is_a? String
+        puts "MVP's gitlab username for #{version} must be String"
+        exit 1
+      end
+      unless mvp.fetch('date').is_a? String
+        puts "MVP's date for #{version} must be String"
+        exit 1
+      end
+    end
+  end
+
+  desc "Ensure correct URIs in /data/roles.yml"
+  task :roles_yml do
+    failed = 0
+
+    puts ''
+    puts '=> Checking if any roles have incorrect URIs...'
+
+    file = YAML.load_file('data/roles.yml')
+    file.each do |role|
+      uri = role["description"]
+      unless File.exist?("source#{uri}")
+        puts role["title"]
+        failed += 1
+      end
+    end
+
+    unless failed.zero?
+      puts '----------------------------'
+      if failed == 1
+        puts "Oops! One role has an incorrect URI."
+      else
+        puts "Oops! #{failed} roles have incorrect URIs."
+      end
+      puts "Check the 'description' line in data/roles.yml to be sure it references the correct page for each role."
+      exit 1
+    end
+
+    puts 'All role URIs are correct!'
+  end
+
+  desc "Ensure correct redirects in /data/redirects.yml"
+  task :redirects_yml do
+    begin
+      Gitlab::Homepage::Redirect.validate_definitions_file!
+
+      puts "✔ #{Gitlab::Homepage::Redirect::DEFNINTIONS_FILE_PATH} valid"
+    rescue StandardError => e
+      puts "✖ Error validating #{Gitlab::Homepage::Redirect::DEFNINTIONS_FILE_PATH}: #{e}"
+      exit 1
+    end
+  end
+
+  namespace :team_yml do
+    desc "Ensure that people have correct roles"
+    task :roles do
+      file = YAML.load_file('data/team.yml')
+      puts ''
+      puts '=> Checking if all people in data/team.yml have a well defined role'
+
+      roles = file.map! do |person|
+        role = person['role']
+
+        next if role.nil?
+
+        # This regex consists of:
+        # 1. A positive lookbehind looking for `href="`
+        # 2. The actual text to be captured (any characted non-greedy)
+        # 3. A positive lookabead looking for a closing `"`
+        # It is done this way because lookbehinds/lookaheads don't create capturing groups
+        # (though we could have also used non-capturing groups `(?:stuff)`)
+        match = role.scan /(?<=href=").+?(?=")/
+
+        next unless match.any?
+
+        match.map do |url|
+          role_url = url.gsub(/#.+/, '')
+          role_url unless File.exist?("source#{role_url}")
+        end.compact.sort
+      end.flatten.compact.sort.uniq
+
+      unless roles.empty?
+
+        puts '----------------------------'
+        puts 'Oops! It seems some roles in the data/team.yml are not defined:'
+        puts roles
+        puts 'Please make sure that the roles exist in the folder /source.'
+        exit 1
+
+      end
+
+      puts 'All the roles in data/team.yml are defined!'
+    end
+
+    desc "Ensure that people on the team page are unique"
+    task :unique do
+      file = YAML.load_file('data/team.yml')
+      unique_fields = %w[slug gitlab twitter]
+
+      unique_fields.each do |field|
+        puts ''
+        puts "=> Checking if all people in data/team.yml have a unique #{field} value"
+
+        values = file.each_with_object({}) do |person, sum|
+          unless person[field].nil?
+            value = person[field]
+            sum[value] = sum[value] ? sum[value] + 1 : 1
+          end
+          sum
+        end
+
+        not_unique = values.delete_if { |_, count| count < 2 }.keys
+
+        next if not_unique.empty?
+
+        puts '----------------------------'
+        puts "Oops! It seems like multiple persons have the same value for '#{field}' on the team page:"
+        puts not_unique
+        puts "Please check that every person in data/team.yml has an unique entry."
+        exit 1
+      end
+
+      puts 'All persons in data/team.yml are unique!'
+    end
+
+    desc "Ensure that the pictures referenced in data/team.yml exist"
+    task :pictures do
+      puts ''
+      puts '=> Checking if all pictures referenced in data/team.yml exist'
+
+      file = YAML.load_file('data/team.yml')
+      no_picture = file.reject { |person| person['picture'] && File.exist?(File.absolute_path("source/images/team/#{person['picture']}")) }
+
+      unless no_picture.empty?
+
+        no_picture = no_picture.map { |person| "\t#{person['name']} => #{person['picture'] || 'No Picture defined'}" }.join("\n")
+
+        puts '----------------------------'
+        puts "Oops! It seems like one or multiple pictures referenced on the team page do not exist:"
+        puts no_picture
+        puts "Check that the 'picture' line in data/team.yml matches the file name of a file in 'source/images/team'."
+        exit 1
+      end
+
+      puts 'All pictures referenced in data/team.yml exist!'
+    end
+
+    desc "Ensure start_date in data/team.yml is valid"
+    task :start_dates do
+      puts ''
+      puts '=> Checking all start dates in data/team.yml are valid'
+
+      members_with_invalid_start_dates = Gitlab::Homepage::Team.new.members_with_invalid_start_dates
+
+      if members_with_invalid_start_dates.any?
+        message = members_with_invalid_start_dates.map { |member| "\t#{member.name} => #{member.start_date}" }.join("\n")
+
+        puts '----------------------------'
+        puts "Oops! It seems like one or multiple start_date in data/team.yml are invalid:"
+        puts message
+        puts "Please check that each start_date is a valid date in the YYYY-MM-DD format."
+        exit 1
+      end
+
+      puts 'All start dates in data/team.yml are valid!'
+    end
+
+    desc "Ensure that entries have a valid type"
+    task :types do
+      file = YAML.load_file('data/team.yml')
+      puts ''
+      puts '=> Checking if all entries in data/team.yml have a valid type'
+
+      valid_types = %w[person vacancy]
+      invalid_types = file.reject { |entry| valid_types.include? entry['type'] }
+
+      unless invalid_types.empty?
+        message = invalid_types.map { |entry| "\t#{entry['name']} => #{entry['type']}" }.join("\n")
+
+        puts '----------------------------'
+        puts 'Oops! It seems some entries in data/team.yml have invalid types:'
+        puts message
+        puts 'Please make sure that the type is either "person" or "vacancy".'
+        exit 1
+      end
+
+      puts 'All entries in data/team.yml have a valid type!'
+    end
+
+    desc "Ensure that reports_to values exist where expected"
+    task :unmanaged do
+      file = YAML.load_file('data/team.yml')
+      puts ''
+      puts '=> Checking if reports_to values in data/team.yml exist where expected'
+
+      UNMANAGED_ROLES = [
+        'Advisor',
+        'Board of Directors',
+        'Core Team member',
+        'Board Observer'
+      ].freeze
+      unmanaged = file.select do |entry|
+        manager = entry['reports_to']
+        manager.nil? || manager.empty?
+      end
+      unmanaged.reject! do |entry|
+        UNMANAGED_ROLES.include?(entry['role']) || entry['name'] == 'You?'
+      end
+
+      unless unmanaged.empty?
+        message = unmanaged.map { |entry| "\t#{entry['name']} (#{entry['slug']})" }.join("\n")
+
+        puts '----------------------------'
+        puts 'Oops! It seems some entries in data/team.yml are missing a "reports_to" value:'
+        puts message
+        puts 'Please make sure that the "reports_to" field is not empty.'
+        exit 1
+      end
+
+      puts 'All reports_to values in data/team.yml exist where expected!'
+    end
+  end
+
+  desc "Check that all docs point to /ee/"
+  task :docs_ee do
+    puts ''
+    abort unless system('./scripts/docs_ee_check.sh')
+    puts ''
+  end
+end
+
+desc 'Begin a new post'
+task :new_post, :title do |t, args|
+  if args.title
+    title = args.title
+  else
+    puts 'Enter a title for your post: '
+    title = STDIN.gets.chomp
+  end
+
+  filename = "source/posts/#{Time.now.strftime('%Y-%m-%d')}-#{title.to_url}.html.md.erb"
+  puts "Creating new post: #{filename}"
+  File.open(filename, 'w') do |post|
+    post.puts '---'
+    post.puts "title: \"#{title.gsub(/&/, '&amp;')}\""
+    post.puts 'author: Firstname Lastname # if name includes special characters use double quotes "First Last"'
+    post.puts 'author_gitlab: GitLab.com username # ex: johndoe'
+    post.puts 'author_twitter: Twitter username or gitlab # ex: johndoe'
+    post.puts 'categories: company'
+    post.puts 'image_title: "/images/blogimages/post-cover-image.jpg"'
+    post.puts 'description: "Short description for the blog post"'
+    post.puts 'tags: tag1, tag2, tag3'
+    post.puts 'cta_button_text: "Watch the <strong>XXX release webcast</strong> live!" # optional'
+    post.puts 'cta_button_link: "https://page.gitlab.com/xxx.html" # optional'
+    post.puts 'guest: false # required when the author is not a GitLab Team Member'
+    post.puts 'ee_cta: false # required only if you do not want to display the EE-trial banner'
+    post.puts 'install_cta: false # required only if you do not want to display the "Install GitLab" banner'
+    post.puts "twitter_text: \"Text to tweet\" # optional;  If no text is provided it will use post's title."
+    post.puts 'featured: yes # reviewer should set'
+    post.puts '---'
+  end
+end
+
+namespace :generators do
+  desc 'Executes direction generator'
+  task :direction do
+    Generators::Direction.new.generate
+  end
+
+  desc 'Executes releases generator'
+  task :releases do
+    ReleaseList.new.generate($stdout)
+  end
+end
+
+namespace :release do
+  desc 'Creates a new release post for major and minor versions'
+  task :monthly, :version do |t, args|
+    version = args.version
+    source_dir = File.expand_path('source', __dir__)
+    date = Time.now.strftime('%Y-%m-22')
+    posts_dir = 'posts'
+
+    raise 'You need to specify a minor version, like 10.1' unless /\A\d+\.\d+\z/.match?(version)
+
+    md_version = version.tr('.', '-')
+    md_filename = "#{source_dir}/#{posts_dir}/#{date}-gitlab-#{md_version}-released.html.md"
+
+    if File.exist?(md_filename)
+      abort('rake aborted!') if ask("#{md_filename} already exists. Do you want to overwrite?", %w[y n]) == 'n'
+    end
+
+    puts "Creating new release post: #{md_filename}"
+
+    md_text = File.read('doc/templates/blog/monthly_release_blog_template.html.md')
+    md_text.gsub!('X_X', version.tr('.', '_'))
+    md_text.gsub!('X.X', version)
+    md_text.gsub!('X-X', version.tr('.', '-'))
+
+    File.open(md_filename, 'w') do |post|
+      post.puts md_text
+    end
+
+    yaml_date = date.tr('-', '_')
+    yaml_version = version.tr('.', '_')
+    yaml_filename = "data/release_posts/#{yaml_date}_gitlab_#{yaml_version}_released.yml"
+
+    if File.exist?(yaml_filename)
+      abort('rake aborted!') if ask("#{yaml_filename} already exists. Do you want to overwrite?", %w[y n]) == 'n'
+    end
+
+    puts "Creating new release post yaml: #{yaml_filename}"
+
+    yaml_text = File.read('doc/templates/blog/YYYY_MM_DD_gitlab_x_y_released.yml')
+    yaml_text.gsub!('X_X', version.tr('.', '_'))
+    yaml_text.gsub!('X.X', version)
+    yaml_text.gsub!('X-X', version.tr('.', '-'))
+
+    File.open(yaml_filename, 'w') do |yaml|
+      yaml.puts yaml_text
+    end
+  end
+
+  # Do not use this task for major or minor releases that go out on 22nd
+  desc 'Creates a new release post for patch versions'
+  task :patch, :version do |t, args|
+    version = args.version
+    source_dir = File.expand_path('source', __dir__)
+    posts_dir = 'posts'
+
+    raise 'You need to specify a patch version, like 10.1.1' unless /\A\d+\.\d+\.\d+\z/.match?(version)
+
+    version = version.tr('.', '-')
+    date = Time.now.strftime('%Y-%m-%d')
+    filename = "#{source_dir}/#{posts_dir}/#{date}-gitlab-#{version}-released.html.md"
+
+    if File.exist?(filename)
+      abort('rake aborted!') if ask("#{filename} already exists. Do you want to overwrite?", %w[y n]) == 'n'
+    end
+
+    puts "Creating new release post: #{filename}"
+
+    template_text = File.read('doc/templates/blog/patch_release_blog_template.html.md.erb')
+    template_text.gsub!('X_X', version.tr('.', '_'))
+    template_text.gsub!('X.X', version)
+    template_text.gsub!('X-X', version.tr('.', '-'))
+
+    File.open(filename, 'w') do |post|
+      post.puts template_text
+    end
+  end
+end
+
+desc 'Create a new press release'
+task :new_press, :title do |t, args|
+  data_dir = File.expand_path('data', __dir__)
+
+  puts 'Enter a date for the press release (ISO format, example: 2016-12-30): '
+  date = STDIN.gets.chomp
+  puts 'Enter a title for the press release: '
+  title = STDIN.gets.chomp
+
+  filename = "source/press/releases/#{date}-#{title.to_url}.html.md"
+  puts "Creating new press release: #{filename}"
+  File.open(filename, 'w') do |pressrel|
+    pressrel.puts '---'
+    pressrel.puts 'layout: markdown_page'
+    pressrel.puts "title: \"#{title.gsub(/&/, '&amp;')}\""
+    pressrel.puts '---'
+    pressrel.puts ''
+  end
+
+  press_yml = "#{data_dir}/press.yml"
+  puts 'Populating data/press.yml'
+  File.open(press_yml, 'a') do |yaml|
+    yaml.puts ''
+    yaml.puts "- title: \"#{title.gsub(/&/, '&amp;')}\""
+    yaml.puts "  link: #{date}-#{title.to_url}.html"
+    yaml.puts "  date: #{date}"
+  end
+end
+
+desc 'Add an existing press release to the archive'
+task :add_press, :title do |t, args|
+  data_dir = File.expand_path('data', __dir__)
+
+  puts 'Enter a date for the press release (ISO format, example: 2016-12-30): '
+  date = STDIN.gets.chomp
+  puts 'Enter a title for the press release: '
+  title = STDIN.gets.chomp
+  puts 'Enter the URL of the press release: '
+  link = STDIN.gets.chomp
+
+  press_yml = "#{data_dir}/press.yml"
+  puts 'Populating data/press.yml'
+  File.open(press_yml, 'a') do |yaml|
+    yaml.puts ''
+    yaml.puts "- title: \"#{title}\""
+    yaml.puts "  link: #{link}"
+    yaml.puts "  date: #{date}"
+  end
+end
+
+desc 'Build the site in public/ (for deployment)'
+task :build do
+  build_cmd = %w[middleman build --bail]
+  raise "command failed: #{build_cmd.join(' ')}" unless system(*build_cmd)
+end
+
+PDFS = %w[
+  public/solutions/high-availability/gitlab-ha.pdf
+  public/solutions/enterprise-class/enterprise-considerations.pdf
+].freeze
+
+PDF_TEMPLATE = 'pdf_template.tex'.freeze
+
+# public/foo/bar.pdf depends on public/foo/bar.html
+rule %r{^public/.*\.pdf} => [->(f) { f.pathmap('%X.html') }, PDF_TEMPLATE] do |pdf|
+  # Avoid distracting 'newline appended' message
+  File.open(pdf.source, 'a', &:puts)
+  # Rewrite the generated HTML to fix image links for pandoc. Image paths
+  # need to be relative paths starting with 'public/'.
+  IO.popen(%W[ed -s #{pdf.source}], 'w') do |ed|
+    ed.puts <<~'REGEX'
+      H
+      g/\.\.\/images\// s//\/images\//g
+      g/'\/images\/ s//'public\/images\//g
+      g/"\/images\// s//"public\/images\//g
+      wq
+    REGEX
+  end
+  warn "Generating #{pdf.name}"
+  version_1 = `pandoc --version`.match(/^pandoc 1/)
+  options = %W[--template=#{PDF_TEMPLATE} -V date=#{Time.now}]
+
+  options <<
+    if version_1
+      "--latex-engine=xelatex"
+    else
+      "--pdf-engine=xelatex"
+    end
+
+  cmd = ['pandoc', *options, '-o', pdf.name, pdf.source]
+  abort("command failed: #{cmd.join(' ')}") unless system(*cmd)
+end
+
+desc 'Generate PDFs'
+task pdfs: PDFS
+
+desc 'Remove PDFs'
+task :rm_pdfs do
+  PDFS.each do |pdf|
+    if File.exist? pdf
+      File.delete pdf
+      puts "Deleting #{pdf}"
+    end
+  end
+end
+
+desc 'Comparison PDFS'
+task :comparison_pdfs do
+  file = YAML.load_file('data/features.yml')
+  file['devops_tools'].each_key do |key, devops_tool|
+    puts key
+    next if key[0..6] == 'gitlab_'
+
+    file_name = "public/devops-tools/pdfs/#{key.dup.tr('_', '-')}-vs-gitlab.html"
+    pdf_file_name = "source/devops-tools/pdfs/#{key.dup.tr('_', '-')}-vs-gitlab.pdf"
+
+    abort('Error generating comparison PDFs 😔') unless system("./comparison_pdfs.sh #{file_name} #{pdf_file_name}")
+  end
+end

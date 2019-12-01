@@ -1,0 +1,479 @@
+{
+    "helpgrup": {
+        "type": "flex",
+        "altText": "AKH TUKANG NIPU LUH!!",
+        "contents": {
+            "type": "bubble",
+            "styles": {
+                "header": {
+                    "backgroundColor": "#000080",
+                    "separator": true,
+                    "separatorColor": "#000000"
+                },
+                "hero": {
+                    "backgroundColor": "#000080",
+                    "separator": true,
+                    "separatorColor": "#000000"
+                },
+                "body": {
+                    "backgroundColor": "#000080",
+                    "separator": true,
+                    "separatorColor": "#000000"
+                },
+                "footer": {
+                    "backgroundColor": "#000080",
+                    "separator": true,
+                    "separatorColor": "#000000"
+                }
+            },
+            "hero": {
+                "type": "image",
+                "url": "https://scontent.fcgk9-2.fna.fbcdn.net/v/t1.0-9/cp0/e15/q65/p851x315/51691304_1868204569955031_2146220437988704256_o.jpg?_nc_cat=103&efg=eyJpIjoiYiJ9&_nc_eui2=AeH2ckLWYQHsnNZ_h-dxkaE6z8BLc-ped-MztW4ZIVdUV-ntVbUtpxp-yrIWasU0oZ8NiwTRmKSqr0DSF8HXmDE7MZQ7aCk7ff-H_i1Gzo8g7w&_nc_oc=AQm7xzTOlb8V5DhWb1yCtqp2gydJU4yXN71S40eVNFtfQE-Cs8vlwLj9D2nFgZaJ7OM&_nc_ht=scontent.fcgk9-2.fna&oh=ff1e25594786cf6cc4efeba88818888f&oe=5DB50A10",
+                "size": "full",
+                "aspectRatio": "3:1"
+            },
+            "header": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "INDEXBOTS",
+                        "color": "#F7141F"
+                    }
+                ]
+            },
+            "footer": {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                    {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "center",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🅷🅴🅻🅿 🅼🅴🅳🅸🅰",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Helpmedia"
+                                }
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#002727"
+                            },
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "center",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🅷🅴🅻🅿 🅼🅴",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Helps"
+                                }
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#002727"
+                            },
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "center",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🅷🅴🅻🅿 🅶🆁🅾🆄🅿",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Helpsgrup"
+                                }
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#002727"
+                            },
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "center",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🅷🅴🅻🅿 🅱🅾🆃🆂",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Helpbot"
+                                }
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#002727"
+                            },
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "center",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🆂🅴🆃🆃 🅾🅽-🅾🅵🅵",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Helpsaklar"
+                                }
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#002727"
+                            },
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "center",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🆂🅴🆃🆃🅸🅽🅶🆂",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Statust"
+                                }
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#002727"
+                            },
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "center",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🅼🆈 🅵🆁🅾🅿🅸🅻🅴",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Myprofil"
+                                }
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#002727"
+                            },
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "center",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🆈🅾🆄🆃🆄🅱🅴",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Youtube"
+                                }
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#002727"
+                            },
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "center",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🆂🆃🅸🅲🅺🅴🆁🅱🅸🅶:🅾🅽-🅾🅵🅵",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Stickerbig:on"
+                                }
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#002727"
+                            },
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "center",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🅷🅴🅻🅿 🆅🅾🅸🅲🅴",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Helpvoice"
+                                }
+                            },
+                            {
+                                "type": "separator",
+                                "color": "#002727"
+                            },
+                            {
+                                "type": "button",
+                                "style": "secondary",
+                                "color": "#BE1700",
+                                "height": "sm",
+                                "gravity": "top",
+                                "flex": 1,
+                                "action": {
+                                    "type": "uri",
+                                    "label": "🅾🆁🅳🅴🆁",
+                                    "uri": "line://app/1626556804-GvDNyK69?type=text&text=Price"
+                                 }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "Headers_X": "udb43d62b8ab3d9390881ded66f8a037a",
+    "pricelist": {
+        "type": "flex",
+        "altText": "INDEXBOTS STORE",
+        "contents": {
+            "type": "bubble",
+            "styles": {
+                "header": {
+                    "backgroundColor": "#000000"
+                },
+                "hero": {
+                    "backgroundColor": "#000000"
+                },
+                "body": {
+                    "backgroundColor": "#000000",
+                    "separator": true,
+                    "separatorColor": "#000080"
+                },
+                "footer": {
+                    "backgroundColor": "#000000",
+                    "separator": true
+                }
+            },
+            "hero": {
+                "type": "image",
+                "url": "https://scontent.fcgk9-2.fna.fbcdn.net/v/t1.0-9/cp0/e15/q65/p851x315/51691304_1868204569955031_2146220437988704256_o.jpg?_nc_cat=103&efg=eyJpIjoiYiJ9&_nc_eui2=AeH2ckLWYQHsnNZ_h-dxkaE6z8BLc-ped-MztW4ZIVdUV-ntVbUtpxp-yrIWasU0oZ8NiwTRmKSqr0DSF8HXmDE7MZQ7aCk7ff-H_i1Gzo8g7w&_nc_oc=AQn9OIKwJojXlHshN7igjGYPAx0PGSK3ICR-Vyp57YXxp1cGQulKVLgPBiaFkJfI2Iw&_nc_ht=scontent.fcgk9-2.fna&oh=bf88bf2a4f06709e8f5d18310f26865c&oe=5DB50A10",
+                "size": "full",
+                "aspectRatio": "3:1"
+            },
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "PRICE LIST",
+                        "weight": "bold",
+                        "color": "#1DB446",
+                        "size": "sm"
+                    },
+                    {
+                        "type": "text",
+                        "text": "IndexBots Store",
+                        "weight": "bold",
+                        "size": "xxl",
+                        "margin": "md"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Bot Template, Bot war, Bot protect \nsiapkan akun sendiri.",
+                        "size": "xs",
+                        "color": "#aaaaaa",
+                        "wrap": true
+                    },
+                    {
+                        "type": "separator",
+                        "margin": "xxl"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "vertical",
+                        "margin": "xxl",
+                        "spacing": "sm",
+                        "contents": [
+                            {
+                                "type": "box",
+                                "layout": "horizontal",
+                                "contents": [
+                                    {
+                                        "type": "text",
+                                        "text": "1 bot Template",
+                                        "size": "sm",
+                                        "color": "#aaaaaa",
+                                        "flex": 0
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "Rp.100,000",
+                                        "size": "sm",
+                                        "color": "#10CF08",
+                                        "align": "end"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "box",
+                                "layout": "horizontal",
+                                "contents": [
+                                    {
+                                        "type": "text",
+                                        "text": "3 bot",
+                                        "size": "sm",
+                                        "color": "#aaaaaa",
+                                        "flex": 0
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "Rp.100,000",
+                                        "size": "sm",
+                                        "color": "#10CF08",
+                                        "align": "end"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "box",
+                                "layout": "horizontal",
+                                "contents": [
+                                    {
+                                        "type": "text",
+                                        "text": "5 bot",
+                                        "size": "sm",
+                                        "color": "#aaaaaa",
+                                        "flex": 0
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "Rp.250,000",
+                                        "size": "sm",
+                                        "color": "#10CF08",
+                                        "align": "end"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "box",
+                                "layout": "horizontal",
+                                "contents": [
+                                    {
+                                        "type": "text",
+                                        "text": "7 bot",
+                                        "size": "sm",
+                                        "color": "#aaaaaa",
+                                        "flex": 0
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "Rp.280,000",
+                                        "size": "sm",
+                                        "color": "#10CF08",
+                                        "align": "end"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "box",
+                                "layout": "horizontal",
+                                "contents": [
+                                    {
+                                        "type": "text",
+                                        "text": "9 bot",
+                                        "size": "sm",
+                                        "color": "#aaaaaa",
+                                        "flex": 0
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "Rp.350,000",
+                                        "size": "sm",
+                                        "color": "#10CF08",
+                                        "align": "end"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "box",
+                                "layout": "horizontal",
+                                "contents": [
+                                    {
+                                        "type": "text",
+                                        "text": "11 bot",
+                                        "size": "sm",
+                                        "color": "#aaaaaa",
+                                        "flex": 0
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": "Rp.450,000",
+                                        "size": "sm",
+                                        "color": "#10CF08",
+                                        "align": "end"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "separator",
+                        "margin": "xxl"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "margin": "md",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "PEMESANAN BOT",
+                                "size": "xs",
+                                "color": "#10CF08",
+                                "flex": 0
+                            },
+                            {
+                                "type": "text",
+                                "text": "PEMESANAN VPS",
+                                "color": "#10CF08",
+                                "size": "xs",
+                                "align": "end"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "box",
+                        "layout": "vertical",
+                        "margin": "md",
+                        "contents": [
+                            {
+                                "type": "spacer",
+                                "size": "xl"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "uri",
+                                    "label": "KLIK DISINI",
+                                    "uri": " line://ti/p/~ptatan1983"
+                                },
+                                "style": "primary",
+                                "color": "#10CF08"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

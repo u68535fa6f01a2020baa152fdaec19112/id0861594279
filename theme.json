@@ -1,0 +1,33 @@
+{
+   "theme_version": "0.2",
+   "engine_version": "0.2.1",
+   "name": "sweetness",
+   "audio_bgm" : "07_sweet_Takeawalk_126bpm.mp3",
+   "overlay_folders" : [
+       { "overlay_name" : "bokeh_sweet", "path" : "bokeh_sweet" },
+       { "overlay_name" : "particle_1", "path" : "particle_1" }
+   ],
+   "timeline" : [
+       { "clip_start" : 0,     "transition" : "tr_expand", "image_overlay":"particle_1", "image_overlay_2":"bokeh_sweet" },
+       { "clip_start" : 2370,  "transition" : "tr_fish_eye", "image_overlay":"particle_1", "image_overlay_2":"bokeh_sweet" },
+       { "clip_start" : 5430,  "transition" : "tr_fish_eye_tl" },
+       { "clip_start" : 7900,  "transition" : "tr_blur_in", "animation" : "SCALE_UP_BR" },
+       { "clip_start" : 10160, "transition" : "tr_landscape_l_r" },
+       { "clip_start" : 12430, "transition" : "tr_landscape_l_r" },
+       { "clip_start" : 15000, "transition" : "tr_fish_eye", "image_overlay":"particle_1", "image_overlay_2":"bokeh_sweet" },
+       { "clip_start" : 17500, "transition" : "tr_blur_in", "animation" : "SCALE_UP_BR" },
+       { "clip_start" : 20500, "transition" : "tr_expand", "animation" : "SCALE_UP_TL" },
+       { "clip_start" : 22760, "transition" : "tr_expand", "animation" : "SCALE_UP_TR" },
+       { "clip_start" : 25000, "transition" : "tr_expand" },
+       { "clip_start" : 27430, "transition" : "tr_expand", "image_overlay":"particle_1", "image_overlay_2":"bokeh_sweet" },
+       { "clip_start" : 30160, "transition" : "tr_fish_eye", "image_overlay":"particle_1", "image_overlay_2":"bokeh_sweet" },
+       { "clip_start" : 32860, "transition" : "tr_fish_eye_br" },
+       { "clip_start" : 35300, "transition" : "tr_blur_in", "animation" : "SCALE_UP_BR" },
+       { "clip_start" : 37600, "transition" : "tr_landscape_l_r" },
+       { "clip_start" : 39860, "transition" : "tr_landscape_l_r", "animation" : "wiggle_zoom_3" },
+       { "clip_start" : 41760, "transition" : "tr_fish_eye", "image_overlay":"particle_1", "image_overlay_2":"bokeh_sweet" },
+       { "clip_start" : 43840, "transition" : "tr_blur_in", "animation" : "SCALE_UP_BR" },
+       { "clip_start" : 45600, "transition" : "tr_blur_in", "animation" : "SCALE_UP_TL" },
+       { "clip_start" : 46660, "transition" : "tr_out" }
+   ]
+}

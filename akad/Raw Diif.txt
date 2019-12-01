@@ -1,0 +1,234 @@
+#}'
+{
+  "log": [
+    {
+      "commit": "745b335211bb9eadfa6aa6301f84715cee4b37c5",
+      "tree": "262a2bcf7b298e9202792fa5aae777ec4d4b1d9c",
+      "parents": [
+        "af54e989a0760d503e9268756eeb327768b7a208"
+      ],
+      "author": {
+        "name": "Joerg Sonnenberger",
+        "email": "joerg@bec.de",
+        "time": "Wed Feb 27 00:40:59 2019 +0000"
+      },
+      "committer": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Tue Apr 02 01:16:53 2019 -0700"
+      },
+      "message": "Fix inline assembler constraint validation\n\nThe current constraint logic is both too lax and too strict. It fails\nfor input outside the [INT_MIN..INT_MAX] range, but it also implicitly\naccepts 0 as value when it should not. Adjust logic to handle both\ncorrectly.\n\nDifferential Revision: https://reviews.llvm.org/D58649\n\n\ngit-svn-id: https://llvm.org/svn/llvm-project/cfe/trunk@354937 91177308-0d34-0410-b5e6-96231b3b80d8\n"
+    },
+    {
+      "commit": "af54e989a0760d503e9268756eeb327768b7a208",
+      "tree": "1a82389eaa70113ad6dc503414c4ff99e4a12807",
+      "parents": [
+        "61f23aed99296fe3545155f3f4352221eb024559"
+      ],
+      "author": {
+        "name": "Hans Wennborg",
+        "email": "hans@hanshq.net",
+        "time": "Wed Mar 06 10:26:19 2019 +0000"
+      },
+      "committer": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Tue Apr 02 01:15:40 2019 -0700"
+      },
+      "message": "Inline asm constraints: allow ICE-like pointers for the \"n\" constraint (PR40890)\n\nApparently GCC allows this, and there\u0027s code relying on it (see bug).\n\nThe idea is to allow expression that would have been allowed if they\nwere cast to int. So I based the code on how such a cast would be done\n(the CK_PointerToIntegral case in IntExprEvaluator::VisitCastExpr()).\n\nDifferential Revision: https://reviews.llvm.org/D58821\n\ngit-svn-id: https://llvm.org/svn/llvm-project/cfe/trunk@355491 91177308-0d34-0410-b5e6-96231b3b80d8\n"
+    },
+    {
+      "commit": "61f23aed99296fe3545155f3f4352221eb024559",
+      "tree": "ea5249a18431d55ef14a6cdcb90613efd1f56883",
+      "parents": [
+        "649b4adfc45b26ae937fe597ef6134d244f89686"
+      ],
+      "author": {
+        "name": "Eric Fiselier",
+        "email": "eric@efcs.ca",
+        "time": "Fri Mar 08 22:06:48 2019 +0000"
+      },
+      "committer": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Tue Apr 02 01:13:24 2019 -0700"
+      },
+      "message": "[8.0 Regression] Fix handling of `__builtin_constant_p` inside template arguments, enumerators, case statements, and the enable_if attribute.\n\nSummary:\nThe following code is accepted by Clang 7 and prior but rejected by the upcoming 8 release and in trunk [1]\n\n```\n// error {{never produces a constant expression}}\nvoid foo(const char* s) __attribute__((enable_if(__builtin_constant_p(*s) \u003d\u003d false, \"trap\"))) {}\nvoid test() { foo(\"abc\"); }\n```\n\nPrior to Clang 8, the call to `__builtin_constant_p` was a constant expression returning false. Currently, it\u0027s not a valid constant expression.\n\nThe bug is caused because we failed to set `InConstantContext` when attempting to evaluate unevaluated constant expressions.\n\n[1]  https://godbolt.org/z/ksAjmq\n\nReviewers: rsmith, hans, sbenza\n\nReviewed By: rsmith\n\nSubscribers: kristina, cfe-commits\n\nTags: #clang\n\nDifferential Revision: https://reviews.llvm.org/D59038\n\ngit-svn-id: https://llvm.org/svn/llvm-project/cfe/trunk@355743 91177308-0d34-0410-b5e6-96231b3b80d8\n"
+    },
+    {
+      "commit": "649b4adfc45b26ae937fe597ef6134d244f89686",
+      "tree": "9a6837e6ff673f9f530804998d484c4383a0d41e",
+      "parents": [
+        "374532a04c019417faac07b7fdf62e83170649b4"
+      ],
+      "author": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Thu Mar 07 14:47:10 2019 -0800"
+      },
+      "committer": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Thu Mar 07 14:50:40 2019 -0800"
+      },
+      "message": "Make HasFloat16 true for all architectures\n\nUpstream Clang removed _Float16 literal support on non-ARM targets.\nframeworks/ml/nn makes heavy use of _Float16 on x86, causing it fail to\nbuild.\n\nMake HasFloat16 true for now in Android toolchain so that NN could\ncontinue to build.\n\nBug: 127391056\nChange-Id: I2be6122d7b1dd8622d6b71606552e2afbfff62a4\n"
+    },
+    {
+      "commit": "374532a04c019417faac07b7fdf62e83170649b4",
+      "tree": "578146789d84a5343aa367447e56867bdc4beb62",
+      "parents": [
+        "a71400342678e0bd321510c0150f7bb30193e49b"
+      ],
+      "author": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Thu Mar 07 14:19:40 2019 -0800"
+      },
+      "committer": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Thu Mar 07 14:47:24 2019 -0800"
+      },
+      "message": "Revert \"Revert removal of F16 literal support for non ARM/SPIR Targets\"\n\nThis reverts commit a71400342678e0bd321510c0150f7bb30193e49b.\n\nThe revert was incomplete. Instead of reverting the changes, just make\nHasFloat16 to be true by default.\n\nChange-Id: I8fce8dc3fb584627a7f16c56efbce4073010af9d\n"
+    },
+    {
+      "commit": "a71400342678e0bd321510c0150f7bb30193e49b",
+      "tree": "0a845285e622edeb57bc86a435dccac020cdfd70",
+      "parents": [
+        "748b59d93fc083b42c7530c7c91d3391ba12c3fe"
+      ],
+      "author": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Mon Mar 04 17:51:32 2019 -0800"
+      },
+      "committer": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Tue Mar 05 05:33:27 2019 +0000"
+      },
+      "message": "Revert removal of F16 literal support for non ARM/SPIR Targets\n\nThis reverts commit 57a6ce7a and 248e5bf6.\n\nframeworks/ml/nn still makes heavy use of _Float16 on x86. Let\u0027s keep\nthis working until they figure out a way to avoid using it.\n\nBug: 127391056\nChange-Id: I98192c407ec1192ec6e340646ffc2c3d86f83d3b\n"
+    },
+    {
+      "commit": "748b59d93fc083b42c7530c7c91d3391ba12c3fe",
+      "tree": "578146789d84a5343aa367447e56867bdc4beb62",
+      "parents": [
+        "213b792f511dc7482dc09f8511d1a15e340fa305"
+      ],
+      "author": {
+        "name": "Pirama Arumuga Nainar",
+        "email": "pirama@google.com",
+        "time": "Mon Jan 14 11:11:41 2019 -0800"
+      },
+      "committer": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Fri Mar 01 10:31:40 2019 -0800"
+      },
+      "message": "Revert \"Re-land \"[LTO] Enable module summary eission by default for regular LTO\"\"\n\nThis reverts commit 8246e4314763066223547505fe18a288f639a475.\n\nChange-Id: I1b25ac90f805d5c93fe227d5e6c25e2f54d0c1aa\n"
+    },
+    {
+      "commit": "213b792f511dc7482dc09f8511d1a15e340fa305",
+      "tree": "7e46b0a45e27bcde4af9adbcb0a2718e44c37549",
+      "parents": [
+        "2d6cd945c70f95b4259b98f51ff688df25c51e0b"
+      ],
+      "author": {
+        "name": "Dan Albert",
+        "email": "danalbert@google.com",
+        "time": "Thu Feb 21 21:13:03 2019 +0000"
+      },
+      "committer": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Fri Mar 01 10:31:35 2019 -0800"
+      },
+      "message": "[Driver] Fix float ABI default for Android ARMv8.\n\nSummary: Android doesn\u0027t regress back to soft float after ARMv7 :)\n\nReviewers: srhines, pirama\n\nReviewed By: srhines, pirama\n\nSubscribers: javed.absar, kristof.beyls, cfe-commits\n\nTags: #clang\n\nDifferential Revision: https://reviews.llvm.org/D58477\n\nChange-Id: I67f54ef75163d24a199bca72183aa75a2777ba8b\ngit-svn-id: https://llvm.org/svn/llvm-project/cfe/trunk@354622 91177308-0d34-0410-b5e6-96231b3b80d8\n"
+    },
+    {
+      "commit": "2d6cd945c70f95b4259b98f51ff688df25c51e0b",
+      "tree": "0c1ae90c9702587f9cb5368d2b1c7321218ae996",
+      "parents": [
+        "8a56a06ed4d2858cb4e442942f2620b3dec172c2",
+        "171531e31716e2db2c372cf8b57220ddf9e721d8"
+      ],
+      "author": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Wed Feb 27 14:17:58 2019 -0800"
+      },
+      "committer": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Wed Feb 27 14:17:58 2019 -0800"
+      },
+      "message": "Merge 171531e317 for LLVM update to 353983\n\nChange-Id: Ia74b4aa849e43a8bf33f944d94d18920454f6a7a\n"
+    },
+    {
+      "commit": "8a56a06ed4d2858cb4e442942f2620b3dec172c2",
+      "tree": "a277ed824e0b7eb20ca8ec7cfb2aba5d21aaf235",
+      "parents": [
+        "08b26c8bfe46241b0ff60f0e25c0cb2e620b6adf"
+      ],
+      "author": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Wed Feb 27 14:17:58 2019 -0800"
+      },
+      "committer": {
+        "name": "Yi Kong",
+        "email": "yikong@google.com",
+        "time": "Wed Feb 27 14:17:58 2019 -0800"
+      },
+      "message": " revert to previous base llvm-svn.349610\n\nChange-Id: I225d988d276b86df0845f26abe5865f434b7505d\n"
+    },
+    {
+      "commit": "08b26c8bfe46241b0ff60f0e25c0cb2e620b6adf",
+      "tree": "c748d13cf073f80e7c2de2a57175250be2e9eed4",
+      "parents": [
+        "4dba9ad555eabb40b39dc53c12d09423e9faea7b"
+      ],
+      "author": {
+        "name": "Dan Albert",
+        "email": "danalbert@google.com",
+        "time": "Thu Feb 21 21:13:03 2019 +0000"
+      },
+      "committer": {
+        "name": "Stephen Hines",
+        "email": "srhines@google.com",
+        "time": "Fri Feb 22 09:57:12 2019 -0800"
+      },
+      "message": "[Driver] Fix float ABI default for Android ARMv8.\n\nSummary: Android doesn\u0027t regress back to soft float after ARMv7 :)\n\nReviewers: srhines, pirama\n\nReviewed By: srhines, pirama\n\nSubscribers: javed.absar, kristof.beyls, cfe-commits\n\nTags: #clang\n\nDifferential Revision: https://reviews.llvm.org/D58477\n\ngit-svn-id: https:
+======================================
+
+#ดัชนี: cfe / trunk / lib / ไดรเวอร์ / ToolChains / Arch / ARM.cpp
+================================================== =================
+--- cfe / trunk / lib / ไดรเวอร์ / ToolChains / Arch / ARM.cpp
++++ cfe / trunk / lib / ไดรเวอร์ / ToolChains / Arch / ARM.cpp
+@@ -248,7 +248,7 @@
+         ABI = FloatABI :: SoftFP;
+         ทำลาย;
+       case llvm :: Triple :: Android:
+- ABI = (SubArch == 7)? FloatABI :: SoftFP: FloatABI :: Soft;
++ ABI = (SubArch> = 7)? FloatABI :: SoftFP: FloatABI :: Soft;
+         ทำลาย;
+       ค่าเริ่มต้น:
+         // สมมติว่า "อ่อน" แต่เตือนผู้ใช้ที่เราคาดเดา
+ดัชนี: cfe / trunk / test / ไดรเวอร์ / arm-float-abi.c
+================================================== =================
+--- cfe / trunk / test / ไดรเวอร์ / arm-float-abi.c
++++ cfe / trunk / test / ไดรเวอร์ / arm-float-abi.c
+@@ -4,3 +4,13 @@
+ 
+ // ARMV7-ERROR: ตัวเลือกที่ไม่รองรับ '-mfloat-abi = hard' สำหรับเป้าหมาย 'thumbv7'
+ // NOERROR-NOT: ตัวเลือกที่ไม่สนับสนุน
++
++ // RUN:% เสียงดังกราว - เป้าหมาย armv7-linux-androideabi21% s - ### -c 2> & 1 \
++ // RUN: | FileCheck --check-prefix = CHECK-ARM7-ANDROID% s
++ // CHECK-ARM7-ANDROID-NOT: "-target-feature" "+ soft-float"
++ // CHECK-ARM7-ANDROID: "-target-feature" "+ soft-float-abi"
++
++ // RUN:% เสียงดังกราว - เป้าหมาย armv8-linux-androideabi21% s - ### -c 2> & 1 \
++ // RUN: | FileCheck --check-prefix = CHECK-ARM8-ANDROID% s
++ // CHECK-ARM8-ANDROID-NOT: "-target-feature" "+ soft-float"
++ // CHECK-ARM8-ANDROID: "-target-feature" "+ soft-float-abi"
